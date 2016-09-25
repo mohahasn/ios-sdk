@@ -27,7 +27,7 @@ public struct Context: JSONEncodable, JSONDecodable {
     public let system: SystemResponse?
     
     /// The JSON representation of this context
-    public var json : JSON?
+    public var json : [String: JSON]?
     
     /**
      Create a `Context` to specify the context, or state, associated with a message.
@@ -42,21 +42,21 @@ public struct Context: JSONEncodable, JSONDecodable {
     
     /// Used internally to initialize a `Context` model from JSON.
     public init(json: JSON) throws {
-        self.json = json
+        self.json = try? json.dictionary()
         conversationID = try? json.string("conversation_id")
         system = try? json.decode("system", type: SystemResponse.self)
     }
     
     /// Used internally to serialize a `Context` model to JSON.
     public func toJSON() -> JSON {
-        //var json = [String: JSON]()
+        var json = self.json
         if let conversationID = conversationID {
-            self.json["conversation_id"] = .String(conversationID)
+            json!["conversation_id"] = .String(conversationID)
         }
         if let system = system {
-            self.json["system"] = system.toJSON()
+            json!["system"] = system.toJSON()
         }
-        return json//JSON.Dictionary(json)
+        return JSON.Dictionary(json!)
     }
 }
 
